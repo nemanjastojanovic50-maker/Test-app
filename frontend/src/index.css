@@ -2,15 +2,122 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Theme: CSS variables (applied via <html data-theme="light|dark">) */
+[data-theme="light"] {
+  --app-bg: #f5f5f5;
+  --app-panel-bg: #ffffff;
+  --app-text: #212121;
+  --app-text-muted: #757575;
+  --app-border: #EEEEEE;
+  --app-primary: #1976D2;
+  --app-primary-green: #4CAF50;
+  --app-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --app-shadow-strong: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  --app-bg: #1a1a1a;
+  --app-panel-bg: #2d2d2d;
+  --app-text: #e8e8e8;
+  --app-text-muted: #a0a0a0;
+  --app-border: #404040;
+  --app-primary: #42a5f5;
+  --app-primary-green: #66bb6a;
+  --app-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --app-shadow-strong: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Default when no data-theme (e.g. before hook runs) */
+html:not([data-theme]) {
+  --app-bg: #f5f5f5;
+  --app-panel-bg: #ffffff;
+  --app-text: #212121;
+  --app-text-muted: #757575;
+  --app-border: #EEEEEE;
+  --app-primary: #1976D2;
+  --app-primary-green: #4CAF50;
+  --app-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --app-shadow-strong: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+/* Theme-aware app sections (use classes app-header, app-sidebar, app-main, app-status) */
+.app-root .app-header {
+  background: var(--app-panel-bg) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+.app-root .app-header span,
+.app-root .app-header h1 {
+  color: var(--app-text) !important;
+}
+.app-root .app-sidebar {
+  background: var(--app-panel-bg) !important;
+  border-color: var(--app-border) !important;
+}
+.app-root .app-sidebar h2,
+.app-root .app-sidebar span {
+  color: var(--app-text) !important;
+}
+.app-root .app-sidebar-footer {
+  background: var(--app-bg) !important;
+  border-color: var(--app-border) !important;
+}
+.app-root .app-status {
+  background: var(--app-panel-bg) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+.app-root .worker-card,
+.app-root .dashboard-assignment-card {
+  background: var(--app-panel-bg) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+.app-root .worker-card:hover {
+  background: var(--app-bg) !important;
+  box-shadow: var(--app-shadow-strong) !important;
+}
+.app-root .btn-secondary {
+  background: var(--app-panel-bg) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+.app-root .btn-secondary:hover {
+  background: var(--app-bg) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+.app-root input,
+.app-root textarea {
+  background: var(--app-panel-bg) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+.app-root input::placeholder,
+.app-root textarea::placeholder {
+  color: var(--app-text-muted);
+}
+.app-root .app-modal-content {
+  background: var(--app-panel-bg) !important;
+  color: var(--app-text) !important;
 }
 
 a {
@@ -22,13 +129,6 @@ a:hover {
   color: #535bf2;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
 
 h1 {
   font-size: 3.2em;
@@ -54,15 +154,62 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Button system: primary and secondary */
+.btn-primary {
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-primary:hover {
+  background: #1565c0 !important;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+}
+.btn-primary.btn-primary--green:hover {
+  background: #43a047 !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
+}
+
+.btn-secondary:hover {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  color: #374151 !important;
+}
+
+/* Worker list cards: hover elevation + soft background */
+.worker-card:hover {
+  background: #f9fafb !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Leaflet map full width/height fixes */
+.worksite-map-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 8px 8px 0;
+}
+
+.worksite-map-container .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  border-radius: 0 8px 8px 0;
+}
+
+.worksite-marker__badge:hover {
+  transform: scale(1.08);
+}
+
+.worksite-marker--drag-over .worksite-marker__badge,
+.worksite-marker__badge.worksite-marker--drag-over {
+  transform: scale(1.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+/* Worksite map popup card: white, rounded, shadow */
+.worksite-map-container .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+.worksite-map-container .leaflet-popup-content {
+  margin: 12px 16px;
+  min-width: 0;
 }
