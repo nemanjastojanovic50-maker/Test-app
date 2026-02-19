@@ -5,10 +5,14 @@ export default function WorkerForm({
   setLastName,
   phone,
   setPhone,
+  email,
+  setEmail,
   note,
   setNote,
+  mode = 'create',
   saving,
-  onCreate,
+  onSave,
+  validationError,
 }) {
   const fieldGap = 16
   const inputStyle = {
@@ -51,6 +55,16 @@ export default function WorkerForm({
         />
       </div>
       <div style={{ marginBottom: fieldGap }}>
+        <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Email (optional)</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={inputStyle}
+          placeholder="worker@example.com"
+        />
+      </div>
+      <div style={{ marginBottom: fieldGap }}>
         <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Note (optional)</label>
         <textarea
           value={note}
@@ -59,8 +73,11 @@ export default function WorkerForm({
           placeholder="Any details..."
         />
       </div>
+      {validationError && (
+        <div style={{ marginTop: 8, marginBottom: 0, fontSize: 13, color: '#b91c1c' }}>{validationError}</div>
+      )}
       <button
-        onClick={onCreate}
+        onClick={onSave}
         disabled={saving}
         className="btn-primary"
         style={{
@@ -78,7 +95,7 @@ export default function WorkerForm({
           transition: 'background 0.2s ease',
         }}
       >
-        {saving ? 'Saving...' : 'Create worker'}
+        {saving ? 'Saving...' : mode === 'edit' ? 'Save changes' : 'Create worker'}
       </button>
     </>
   )

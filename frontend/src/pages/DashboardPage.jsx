@@ -27,8 +27,11 @@ export default function DashboardPage({ session, onSignOut }) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [note, setNote] = useState('')
   const [savingWorker, setSavingWorker] = useState(false)
+  const [editingWorkerId, setEditingWorkerId] = useState(null)
+  const [workerValidationError, setWorkerValidationError] = useState('')
 
   const [worksites, setWorksites] = useState([])
   const [workers, setWorkers] = useState([])
@@ -210,7 +213,27 @@ export default function DashboardPage({ session, onSignOut }) {
     setFirstName('')
     setLastName('')
     setPhone('')
+    setEmail('')
     setNote('')
+    setEditingWorkerId(null)
+    setWorkerValidationError('')
+  }
+
+  const openEditWorker = (worker) => {
+    setEditingWorkerId(worker.id)
+    setFirstName(worker.first_name ?? '')
+    setLastName(worker.last_name ?? '')
+    setPhone(worker.phone ?? '')
+    setEmail(worker.email ?? '')
+    setNote(worker.note ?? '')
+    setWorkerValidationError('')
+    setShowWorkerModal(true)
+  }
+
+  const openAddWorker = () => {
+    setEditingWorkerId(null)
+    resetWorkerForm()
+    setShowWorkerModal(true)
   }
 
   const resetWorksiteForm = () => {
@@ -238,17 +261,41 @@ export default function DashboardPage({ session, onSignOut }) {
     loadData()
   }
 
-  const createWorker = async () => {
-    if (!firstName.trim()) return setMsg('First name is required.')
-    if (!lastName.trim()) return setMsg('Last name is required.')
+  const validateWorkerForm = () => {
+    if (!firstName.trim()) {
+      setWorkerValidationError('First name is required.')
+      return false
+    }
+    if (!lastName.trim()) {
+      setWorkerValidationError('Last name is required.')
+      return false
+    }
+    const emailVal = email?.trim()
+    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      setWorkerValidationError('Please enter a valid email address.')
+      return false
+    }
+    setWorkerValidationError('')
+    return true
+  }
+
+  const saveWorker = async () => {
+    if (!validateWorkerForm()) return
     setSavingWorker(true)
+    setWorkerValidationError('')
     setMsg('Saving worker...')
-    const { data: insertedWorkers, error: wErr } = await workersService.create({
-      firstName,
-      lastName,
-      phone,
-      note,
-    })
+    const payload = { firstName, lastName, phone, email, note }
+    if (editingWorkerId) {
+      const { error: wErr } = await workersService.updateWorker(editingWorkerId, payload)
+      setSavingWorker(false)
+      if (wErr) return setMsg(`Error: ${wErr.message}`)
+      setMsg('Worker updated.')
+      resetWorkerForm()
+      setShowWorkerModal(false)
+      loadData()
+      return
+    }
+    const { data: insertedWorkers, error: wErr } = await workersService.createWorker(payload)
     if (wErr) {
       setSavingWorker(false)
       return setMsg(`Error: ${wErr.message}`)
@@ -353,7 +400,7 @@ export default function DashboardPage({ session, onSignOut }) {
           <div style={{ padding: 24, borderBottom: '1px solid #EEEEEE', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#212121' }}>Workers</h2>
             <button
-              onClick={() => setShowWorkerModal(true)}
+              onClick={openAddWorker}
               className="btn-primary"
               style={{ padding: '10px 20px', background: '#1976D2', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 500, fontSize: 14, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8 }}
             >
@@ -361,7 +408,7 @@ export default function DashboardPage({ session, onSignOut }) {
             </button>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: 24, minHeight: 0, scrollBehavior: 'smooth' }}>
-            <WorkerList workers={filteredUnassignedWorkers} />
+            <WorkerList workers={filteredUnassignedWorkers} onEditWorker={openEditWorker} />
           </div>
           <div className="app-sidebar-footer" style={{ padding: 24, borderTop: '1px solid #EEEEEE', background: '#FAFAFA', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -448,7 +495,7 @@ export default function DashboardPage({ session, onSignOut }) {
         </>
       )}
 
-      <Modal isOpen={showWorkerModal} onClose={handleCloseWorkerModal} title="Add worker">
+      <Modal isOpen={showWorkerModal} onClose={handleCloseWorkerModal} title={editingWorkerId ? 'Edit worker' : 'Add worker'}>
         <WorkerForm
           firstName={firstName}
           setFirstName={setFirstName}
@@ -456,10 +503,14 @@ export default function DashboardPage({ session, onSignOut }) {
           setLastName={setLastName}
           phone={phone}
           setPhone={setPhone}
+          email={email}
+          setEmail={setEmail}
           note={note}
           setNote={setNote}
+          mode={editingWorkerId ? 'edit' : 'create'}
           saving={savingWorker}
-          onCreate={createWorker}
+          onSave={saveWorker}
+          validationError={workerValidationError}
         />
         <button
           onClick={handleCloseWorkerModal}

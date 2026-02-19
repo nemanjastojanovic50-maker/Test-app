@@ -11,7 +11,7 @@ function getStatusColor(note) {
   return '#FFB300' // orange - has note (e.g. availability)
 }
 
-export default function WorkerList({ workers }) {
+export default function WorkerList({ workers, onEditWorker }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {workers.length === 0 ? (
@@ -83,6 +83,29 @@ export default function WorkerList({ workers }) {
                   <span style={{ fontSize: 12, color: '#757575' }}>{statusText}</span>
                 </div>
               </div>
+              {onEditWorker && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onEditWorker(w)
+                  }}
+                  style={{
+                    flexShrink: 0,
+                    padding: '8px 12px',
+                    fontSize: 12,
+                    background: '#f5f5f5',
+                    color: '#424242',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  Edit
+                </button>
+              )}
             </div>
           )
         })
