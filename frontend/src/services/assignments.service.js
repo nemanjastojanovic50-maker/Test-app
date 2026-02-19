@@ -4,7 +4,7 @@ export const assignmentsService = {
   async getAll() {
     const { data, error } = await supabase
       .from('assignments')
-      .select('id, worksite_id, worker:workers(id, first_name, last_name)')
+      .select('id, worksite_id, worker:workers(id, first_name, last_name, email)')
       .order('assigned_at', { ascending: false })
     return { data, error }
   },

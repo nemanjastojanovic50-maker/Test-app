@@ -1,5 +1,22 @@
 import { useState, useEffect } from 'react'
 
+function buildShiftDetailsMessage(worksite, selectedDate, shift) {
+  const lines = [
+    'CrewFlow shift details',
+    '',
+    `Worksite: ${worksite?.title ?? '—'}`,
+    `Address: ${worksite?.address_text?.trim() || '—'}`,
+    `Date: ${selectedDate ?? '—'}`,
+    `Worker pay: ${Number(shift?.worker_pay) || 0} RSD/worker/day`,
+  ]
+  const lat = worksite?.lat != null && worksite?.lng != null ? Number(worksite.lat) : null
+  const lng = worksite?.lng != null ? Number(worksite.lng) : null
+  if (lat != null && lng != null) {
+    lines.push('', `Map: https://www.google.com/maps?q=${lat},${lng}`)
+  }
+  return lines.join('\n')
+}
+
 export default function WorksiteDetailPanel({
   worksite,
   assignedWorkers,
@@ -178,37 +195,67 @@ export default function WorksiteDetailPanel({
           <div style={{ fontSize: 13, color: '#757575' }}>None. Drag a worker from the left onto this worksite on the map.</div>
         ) : (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {assignedWorkers.map((a) => (
-              <li
-                key={a.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 0',
-                  borderBottom: '1px solid #f3f4f6',
-                }}
-              >
-                <span style={{ fontSize: 14 }}>
-                  {a.worker?.first_name} {a.worker?.last_name}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onRemoveWorker(a.worker?.id)}
+            {assignedWorkers.map((a) => {
+              const workerEmail = a.worker?.email?.trim()
+              const messageBody = buildShiftDetailsMessage(worksite, selectedDate, shift)
+              const gmailHref = workerEmail
+                ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(workerEmail)}&su=${encodeURIComponent('CrewFlow shift details')}&body=${encodeURIComponent(messageBody)}`
+                : null
+              return (
+                <li
+                  key={a.id}
                   style={{
-                    padding: '6px 12px',
-                    fontSize: 12,
-                    background: 'transparent',
-                    color: '#F44336',
-                    border: '1px solid #FFCDD2',
-                    borderRadius: 8,
-                    cursor: 'pointer',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '12px 0',
+                    borderBottom: '1px solid #f3f4f6',
                   }}
                 >
-                  Remove
-                </button>
-              </li>
-            ))}
+                  <span style={{ fontSize: 14, flex: '1 1 auto' }}>
+                    {a.worker?.first_name} {a.worker?.last_name}
+                  </span>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                    {gmailHref ? (
+                      <a
+                        href={gmailHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: 12,
+                          background: '#1976D2',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        Send email (Gmail)
+                      </a>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => onRemoveWorker(a.worker?.id)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: 12,
+                        background: 'transparent',
+                        color: '#F44336',
+                        border: '1px solid #FFCDD2',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>
